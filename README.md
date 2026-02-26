@@ -30,6 +30,71 @@ Avant de déployer une nouvelle infrastructure en production, votre responsable 
 
 ---
 
+
+# PARTIE 1 - Création du réseau virtuel
+
+## Architecture
+
+- 3 routeurs FRR interconnectés en triangle
+- 3 PC (un derrière chaque routeur)
+- 1 serveur vulnérable derrière le routeur 3
+
+---
+
+## 1. Fichier frrlab.clab.yml
+
+```yaml
+name: frrlab
+
+topology:
+  nodes:
+    router1:
+      kind: linux
+      image: frrouting/frr:v7.5.1
+      binds:
+        - daemons:/etc/frr/daemons
+
+    router2:
+      kind: linux
+      image: frrouting/frr:v7.5.1
+      binds:
+        - daemons:/etc/frr/daemons
+
+    router3:
+      kind: linux
+      image: frrouting/frr:v7.5.1
+      binds:
+        - daemons:/etc/frr/daemons
+
+    PC1:
+      kind: linux
+      image: praqma/network-multitool:latest
+
+    PC2:
+      kind: linux
+      image: praqma/network-multitool:latest
+
+    PC3:
+      kind: linux
+      image: praqma/network-multitool:latest
+
+    serveur:
+      kind: linux
+      image: vulnerables/web-dvwa
+
+  links:
+    - endpoints: ["router1:eth1", "router2:eth1"]
+    - endpoints: ["router2:eth2", "router3:eth1"]
+    - endpoints: ["router1:eth2", "router3:eth2"]
+
+    - endpoints: ["PC1:eth1", "router1:eth3"]
+    - endpoints: ["PC2:eth1", "router2:eth3"]
+    - endpoints: ["PC3:eth1", "router3:eth3"]
+
+    - endpoints: ["serveur:eth1", "router3:eth4"]
+
+
+
 ## 1. Configuration du fichier daemons (à réaliser par l’étudiant)
 
 Chaque routeur doit posséder le fichier `daemons` suivant :
